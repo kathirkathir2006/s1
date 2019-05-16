@@ -1,0 +1,92 @@
+package com.cttech.controller;
+
+import java.util.ArrayList;
+import java.util.List;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+
+import com.cttech.model.Employee;
+import com.cttech.model.EmployeeForm;
+
+@Controller
+public class HomeController {
+	@RequestMapping(value = "/", method = RequestMethod.GET)
+	public String getUsers(Model model) throws Exception {
+		List<Employee> users = getListOfUsers();
+		EmployeeForm empList = new EmployeeForm();
+		empList.setUsers(users);
+		model.addAttribute("Users", empList);
+		return "showusers";
+	}
+
+	@RequestMapping(value = "saveUsers", method = RequestMethod.POST)
+	public String postUsers(@ModelAttribute("Users") Employee emp ,Model model) throws Exception {
+		List<Employee> users = getListOfUsers();
+		System.out.println("before "+users);
+		users.add(emp);
+		System.out.println("after "+users);
+		EmployeeForm empList = new EmployeeForm();
+		empList.setUsers(users);
+		model.addAttribute("Users", empList);
+		return "showusers";
+	}
+	
+	// Dummy method for adding List of Users
+	private List<Employee> getListOfUsers() {
+		List<Employee> emps = new ArrayList<Employee>();
+		emps.add(new Employee("Jack", "Reacher", "abc@xyz.com"));
+		emps.add(new Employee("Remington", "Steele", "rs@cbd.com"));
+		emps.add(new Employee("Jonathan", "Raven", "jr@sn.com"));
+		return emps;
+	}
+
+}
+
+front end:
+
+
+<%@ page language="java" contentType="text/html; charset=ISO-8859-1"
+    pageEncoding="ISO-8859-1"%>
+<!DOCTYPE html>
+<%@taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
+<%@ taglib prefix="form" uri="http://www.springframework.org/tags/form"%>
+<html>
+<head>
+<script
+	src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.0/jquery.min.js"></script>
+<meta charset="ISO-8859-1">
+<title>Spring MVC List of objects display</title>
+</head>
+<body>
+<form:form method="POST" action="saveUsers" modelAttribute="Users">
+
+	<input type="button" value="Add" id="btnAdd" /> 
+	<input type="button" value="Display Values" id="btnDisplay" />
+		<div id="dynPanel"></div>
+<input type="submit" value="Save" />
+</form:form>
+	<script>
+$(document).ready(function(){
+  $("#btnAdd").click(function(){
+	var totalCount = $(".name-selector").length;
+	var txtName = "Name: <input name='users["+totalCount+"].firstName' value='${user.firstName}' class='name-selector'></input>";
+	var txtLast= "Last Name: <input name='users["+totalCount+"].lastName' class='name-selector'></input>";
+	var txtEmail= "Email: <input name='users["+totalCount+"].email' class='name-selector' type='email'></input>";
+	var newLine = "<br/>"
+	var panelElements = txtName+newLine+txtLast+newLine+txtEmail+ newLine+newLine+newLine;
+    $("#dynPanel").append(panelElements);
+  });
+  $("#btnDisplay").click(function(){
+	var allValues = "";
+	$(".name-selector").each(function(){
+		allValues += $(this).val() + ";";
+	});
+	alert(allValues);
+  });
+});
+</script>
+</body>
+</html>
